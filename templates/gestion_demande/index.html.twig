@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello GestionDemandeController!{% endblock %}
+
+{% block body %}
+{% if is_granted("ROLE_GESTION") %}
+Vous pouvez regarder
+{% else %}
+Erreur vous avez pas le bon role
+{% endif %}
+{% endblock %}

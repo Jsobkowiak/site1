@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{parent()}} Profile{% endblock %}
+{% block body %}
+
+
+
+{% if not is_granted('IS_AUTHENTICATED_FULLY') %}
+<h3 class="text-center text-danger">Pour voir votre profil</h1>
+    {% else %}
+    <h1 class="text-center text-danger">Vos informations</h1>
+    <p class="text-center text-info">Votre adresse email : {{ app.user.email }} </p>
+    <h1 class="text-center text-danger">Voici tout vos demandes d'identite</h1>
+    <div class="container">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr class="fw-bold text-primary">
+                        <th scope="col">Etat</th>
+                        <th scope="col">Numéro de dossier</th>
+                        <th scope="col">Votre nom</th>
+                        <th scope="col">Votre Prenom</th>
+                        <th scope="col">Justificatif de domicile</th>
+                        <th scope="col">Ancienne carte d'identite</th>
+                        <th scope="col">Gestion</th>
+                        <th scope="col">Valider le dossier</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for identite in listeiden |sort((a, b)=> a.estvalide <=> b.estvalide)%}
+
+                    {% if identite.user.id == app.user.id %}
+
+                    <td> {% if identite.estValide == 0 %}
+                        <p class="text-warning fw-bold">Votre demande est en attente</p>
+                        {% endif %}
+                        {% if identite.estValide == 1 %}
+                        <p class="text-danger fw-bold">Votre demande est invalide</p>
+                        {% endif %}
+                        {% if identite.estValide == 2 %}
+                        <p class="text-success fw-bold">Votre demande est valide</p>
+                        {% endif %}
+                        {% if identite.estValide == 3 %}
+                        <p class="text-primary fw-bold">Votre dossier est terminer</p>
+                        {% endif %}</td>
+                    <td>{{ identite.id }}</td>
+                    <td>{{ identite.nom }}</td>
+                    <td>{{ identite.prenom }}</td>
+                    <td>{{ identite.justifdomi.nomOriginal }}<a href="{{path('telechargement-fichier', {'id':identite.justifdomi.id})}}" target="_blank"> <i class="bi bi-download text-black"></i></td>
+
+                    {% if identite.anciennecard != null %}
+                    <td>{{ identite.anciennecard.nomOriginal }}<a href="{{path('telechargement-fichier', {'id':identite.anciennecard.id})}}" target="_blank"> <i class="bi bi-download text-black"></i></td>
+                    {% endif %}
+                    {% if identite.anciennecard == null %}
+                    <td>Fichier Manquant</td>
+                    {% endif %}
+                    <td><a href="{{path('gestion-modif', {'id':identite.id})}}">Modifier</a> </td>
+                    {% if identite.estValide == 2%}
+                    <td><a href="{{path('gestion-terminer', {'id':identite.id})}}">Terminer le dossier</a> </td>
+                    {% endif %}
+                </tbody>{% endif %}{% endfor %}
+            </table>
+
+        </div>
+
+
+
+
+
+
+        {% endif %}
+        {% endblock %}

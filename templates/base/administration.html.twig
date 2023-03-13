@@ -1,0 +1,133 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{parent()}}Administration{% endblock %}
+
+{% block body %}
+{% if not is_granted('IS_AUTHENTICATED_FULLY') %}
+
+
+<h3 class="text-center text-danger">Pour accéder a cette page vous devez vous connectez</h1>
+    {% else %}
+    {% if "ROLE_ADMIN" in app.user.roles %}
+    {% for message in app.flashes('notice') %}
+    <h2 class="alert alert-dismissible alert-success text-center mt-4 mb-4" role="alert">
+        {{ message }}
+    </h2>
+    {% endfor %}
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+
+            <div class="col-10 text-primary">
+                <h1 class="text-center text-primary mt-4 pt-4 display-1 fw-bold">Administration</h1>
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#home">Liste des demandes de repas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#profile">Liste des demandes de carte d'identité</a>
+                    </li>
+                </ul>
+                <div id="myTabContent" class="tab-content">
+                    <div class="tab-pane fade" id="home">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr class="fw-bold text-primary">
+                                        <th scope="col">Nom</th>
+                                        <th scope="col">Prenom</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">Ecole</th>
+                                        <th scope="col">Date du repas</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for gestion in listegestion %}
+                                    <tr class="text-primary">
+                                        <td>{{ gestion.nom | capitalize }}</td>
+                                        <td>{{ gestion.prenom | capitalize }}</td>
+                                        <td>{{ gestion.email | lower }}</td>
+                                        <td>{{ gestion.ecole | capitalize }}</td>
+                                        <td>{{ gestion.date | date("d-m-y") }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                    <div class="tab-pane fade  active show" id="profile">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr class="fw-bold text-primary">
+                                        <th scope="col">Etat</th>
+                                        <th scope="col">Numéro de dossier</th>
+                                        <th scope="col">Nom</th>
+                                        <th scope="col">Prenom</th>
+                                        <th scope="col">Lieu de naissance</th>
+                                        <th scope="col">Ville</th>
+                                        <th scope="col">Adresse</th>
+                                        <th scope="col">Code Postal</th>
+                                        <th scope="col">date de naissance</th>
+                                        <th scope="col">Justificatif de domicile</th>
+                                        <th scope="col">Ancienne carte d'identite</th>
+                                        <th scope="col">Gestion Etat</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for identite in listeiden|sort((a, b)=> a.estvalide <=> b.estvalide) %}
+                                    <tr class="text-primary fw-bold">
+                                        {% if identite.estvalide == 2 %}
+                                        <td class="text-success">Valider</td>
+                                        {% endif %}
+                                        {% if identite.estvalide == 0 %}
+                                        <td class="text-warning fw-bold">Le dossier est en cours de traitement</td>
+                                        {% endif %}
+                                        {% if identite.estvalide == 1 %}
+                                        <td class="text-danger fw-bold">invalide</td>
+                                        {% endif %}
+                                        {% if identite.estvalide == 3 %}
+                                        <td class="text-primary fw-bold">Dossier terminer</td>
+                                        {% endif %}
+                                        <td>{{ identite.id | capitalize }}</td>
+                                        <td>{{ identite.nom | capitalize }}</td>
+                                        <td>{{ identite.prenom | capitalize }}</td>
+                                        <td>{{ identite.lieunaissance | lower }}</td>
+                                        <td>{{ identite.ville | capitalize }}</td>
+                                        <td>{{ identite.adresse | capitalize }}</td>
+                                        <td>{{ identite.codepostal | capitalize }}</td>
+                                        <td>{{ identite.date | date("d-m-y") }}</td>
+
+                                        <td>{{ identite.justifdomi.nomOriginal }}<a href="{{path('telechargement-fichier', {'id':identite.justifdomi.id})}}" target="_blank"> <i class="bi bi-download text-black"></i></td>
+                                        {% if identite.anciennecard != null %}
+                                        <td>{{ identite.anciennecard.nomOriginal }}<a href="{{path('telechargement-fichier', {'id':identite.anciennecard.id})}}" target="_blank"> <i class="bi bi-download text-black"></i></td>
+                                        {% endif %}
+                                        {% if identite.sanscarte == 0 %}
+                                        {% if identite.anciennecard == null %}
+                                        <td>Fichier Manquant</td>
+                                        {% endif %}
+                                        {% else %}
+                                        <td>Il n'y a pas d'ancienne carte d'identité</td>
+                                        {% endif %}
+
+                                        <td class="text-dark"><a href="{{path('gestion-valide', {'id':identite.id})}}" target="_blank">Valider | <a href="{{path('gestion-refuser', {'id':identite.id})}}" target="_blank">Refuser</td>
+                                        {% endfor %}
+
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+                {% else %}
+                <h1 class="text-warning text-center">Vous devez être administrateur ou responsable de la gestion pour accéder a cette page</h1>
+                {% endif %}
+
+
+                {% endif %}
+                {% endblock %}
